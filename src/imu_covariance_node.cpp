@@ -5,8 +5,8 @@
 #include <string>
 #include <Eigen/Dense>
 
-using Eigen::Matrix3f;
-using Eigen::Vector3f;
+using Eigen::Matrix3d;
+using Eigen::Vector3d;
 
 class ImuCovarianceNode : public rclcpp::Node
 {
@@ -38,9 +38,12 @@ private:
         current_iteration_++;
 
         // Print percentage of max_iterations_
+        static int prePercentage = 0;
         int percentage = (current_iteration_ * 100) / max_iterations_;
-        if (percentage % 10 == 0) 
+
+        if (prePercentage != percentage) 
         {
+            prePercentage = percentage;
             std::cout << "Reached " << percentage << "% of max_iterations_" << std::endl;
         }
 
@@ -54,14 +57,14 @@ private:
 
     void calculate_and_save(std::string filename)
     {
-        Vector3f orientation_mean = calculate_mean(orientation_data_);
-        Matrix3f orientation_cov = calculate_covariance(orientation_data_, orientation_mean);
+        Vector3d orientation_mean = calculate_mean(orientation_data_);
+        Matrix3d orientation_cov = calculate_covariance(orientation_data_, orientation_mean);
 
-        Vector3f angular_velocity_mean = calculate_mean(angular_velocity_data_);
-        Matrix3f angular_velocity_cov = calculate_covariance(angular_velocity_data_, angular_velocity_mean);
+        Vector3d angular_velocity_mean = calculate_mean(angular_velocity_data_);
+        Matrix3d angular_velocity_cov = calculate_covariance(angular_velocity_data_, angular_velocity_mean);
 
-        Vector3f linear_acceleration_mean = calculate_mean(linear_acceleration_data_);
-        Matrix3f linear_acceleration_cov = calculate_covariance(linear_acceleration_data_, linear_acceleration_mean);
+        Vector3d linear_acceleration_mean = calculate_mean(linear_acceleration_data_);
+        Matrix3d linear_acceleration_cov = calculate_covariance(linear_acceleration_data_, linear_acceleration_mean);
 
         std::ofstream file(filename);
         if (file.is_open()) 
@@ -84,9 +87,9 @@ private:
         }
     }
 
-    Vector3f calculate_mean(const std::vector<Vector3f>& data)
+    Vector3d calculate_mean(const std::vector<Vector3d>& data)
     {
-        Vector3f mean = Vector3f::Zero();
+        Vector3d mean = Vector3d::Zero();
         for (const auto& sample : data) 
         {
             mean += sample;
@@ -94,12 +97,12 @@ private:
         return mean / data.size();
     }
 
-    Matrix3f calculate_covariance(const std::vector<Vector3f>& data, const Vector3f& mean)
+    Matrix3d calculate_covariance(const std::vector<Vector3d>& data, const Vector3d& mean)
     {
-        Matrix3f covariance = Matrix3f::Zero();
+        Matrix3d covariance = Matrix3d::Zero();
         for (const auto& sample : data) 
         {
-            Vector3f diff = sample - mean;
+            Vector3d diff = sample - mean;
             covariance += diff * diff.transpose();
         }
         return covariance / (data.size() - 1);
@@ -109,9 +112,9 @@ private:
     int max_iterations_;
     int current_iteration_;
     std::string filename_;
-    std::vector<Vector3f> orientation_data_;
-    std::vector<Vector3f> angular_velocity_data_;
-    std::vector<Vector3f> linear_acceleration_data_;
+    std::vector<Vector3d> orientation_data_;
+    std::vector<Vector3d> angular_velocity_data_;
+    std::vector<Vector3d> linear_acceleration_data_;
 };
 
 int main(int argc, char *argv[])

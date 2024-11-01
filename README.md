@@ -7,10 +7,10 @@ colcon build --packages-select imu_covariance
 ```
 ### How to run
 1. Run IMU Publisher First
-2. ```ros2 run imu_covariance imu_covariance_node iteration file_name```
+2. ```ros2 run imu_covariance imu_covariance_node iteration file_name imu_topic_name```
 
 #### Default option
 - iteration : 100
 - file_name : covariance_matrix.txt
-
+- imu_topic_name : imu/data
 

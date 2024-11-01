@@ -11,17 +11,19 @@ using Eigen::Vector3f;
 class ImuCovarianceNode : public rclcpp::Node
 {
 public:
-    ImuCovarianceNode(int iterations, std::string file_name)
+    ImuCovarianceNode(int iterations, std::string file_name, std::string imu_topic)
     : Node("imu_covariance_node"), max_iterations_(iterations), current_iteration_(0), filename_(file_name)
     {
         imu_subscriber_ = this->create_subscription<sensor_msgs::msg::Imu>(
-            "imu/data", 10,
+            imu_topic, 10,
             std::bind(&ImuCovarianceNode::imu_callback, this, std::placeholders::_1));
     }
 
 private:
     void imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
     {
+        if (max_iterations_ == 0) return; // Avoid division by zero
+
         if (current_iteration_ >= max_iterations_) 
         {
             rclcpp::shutdown();
@@ -34,6 +36,13 @@ private:
         linear_acceleration_data_.emplace_back(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
 
         current_iteration_++;
+
+        // Print percentage of max_iterations_
+        int percentage = (current_iteration_ * 100) / max_iterations_;
+        if (percentage % 10 == 0) 
+        {
+            std::cout << "Reached " << percentage << "% of max_iterations_" << std::endl;
+        }
 
         // File write and finish node when the number of iterations is reached
         if (current_iteration_ == max_iterations_) 
@@ -57,11 +66,14 @@ private:
         std::ofstream file(filename);
         if (file.is_open()) 
         {
-            file << orientation_cov << "\n";
+            file << "Orientation covariance matrix:\n";
+            file << orientation_cov << "\n\n";
 
-            file << angular_velocity_cov << "\n";
+            file << "Angular velocity covariance matrix:\n";
+            file << angular_velocity_cov << "\n\n";
 
-            file << linear_acceleration_cov << "\n";
+            file << "Linear acceleration covariance matrix:\n";
+            file << linear_acceleration_cov << "\n\n";
 
             file.close();
             RCLCPP_INFO(this->get_logger(), "Data saved to imu_data_covariance.txt");
@@ -107,12 +119,14 @@ int main(int argc, char *argv[])
     rclcpp::init(argc, argv);
     int iterations = 100;  // number of iteration 
     std::string filename = "covariance_matrix.txt";  // file name to save covariance matrix
+    std::string imu_topic = "imu/data";
     if (argc > 1) 
     {
         iterations = std::stoi(argv[1]);
-        filename = argv[2];
+        if (argc > 2) filename = argv[2];
+        if (argc > 3) imu_topic = argv[3];
     }
-    rclcpp::spin(std::make_shared<ImuCovarianceNode>(iterations, filename));
+    rclcpp::spin(std::make_shared<ImuCovarianceNode>(iterations, filename, imu_topic));
     rclcpp::shutdown();
     return 0;
 }

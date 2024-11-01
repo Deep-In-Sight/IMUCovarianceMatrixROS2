@@ -1,0 +1,12 @@
+<package format="2">
+  <name>imu_covariance</name>
+  <version>0.0.0</version>
+  <description>IMU Covariance Matrix Generator</description>
+  <maintainer email="your_email@domain.com">Your Name</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+
+</package>

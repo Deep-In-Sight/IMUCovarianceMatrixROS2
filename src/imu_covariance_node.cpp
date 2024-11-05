@@ -79,7 +79,8 @@ private:
             file << linear_acceleration_cov << "\n\n";
 
             file.close();
-            RCLCPP_INFO(this->get_logger(), "Data saved to imu_data_covariance.txt");
+            std::string result = "Data saved to " + filename;
+            RCLCPP_INFO(this->get_logger(), result.c_str());
         } 
         else 
         {

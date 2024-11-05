@@ -14,3 +14,7 @@ colcon build --packages-select imu_covariance
 - file_name : covariance_matrix.txt
 - imu_topic_name : imu/data
 
+## Result - [LPMS-RS232AL3](https://www.lp-research.com/imu/lpms-al3/)
+![Local Image](./result/img/orientation_covariance.png)
+![Local Image](./result/img/angular_velocity_covariance.png)
+![Local Image](./result/img/linear_acceleration_covariance.png)

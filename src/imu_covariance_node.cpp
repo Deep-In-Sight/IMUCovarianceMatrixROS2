@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 using Eigen::Matrix3d;
 using Eigen::Vector3d;
@@ -31,7 +32,11 @@ private:
         }
 
         // Subscribe Orientation, Angular Velocity, Linear Acceleration
-        orientation_data_.emplace_back(msg->orientation.x, msg->orientation.y, msg->orientation.z);
+        // Convert Quaternion to Euler
+
+        Eigen::Quaterniond q(msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
+        Eigen::Vector3d euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
+        orientation_data_.emplace_back(euler[0], euler[1], euler[2]);
         angular_velocity_data_.emplace_back(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
         linear_acceleration_data_.emplace_back(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
 
